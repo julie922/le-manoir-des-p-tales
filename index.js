@@ -152,13 +152,6 @@ async function callAI(messages) {
       }
     }
   }
-  if (genAI) {
-    try {
-      return await callGemini(messages);
-    } catch (error) {
-      console.log('⚠ Gemini indispo — bascule sur OpenRouter...', error.message);
-    }
-  }
   if (!process.env.OPENROUTER_API_KEY) throw new Error('Aucune API disponible');
   return await callOpenRouter(messages);
 }
@@ -198,8 +191,13 @@ client.on('messageCreate', async (message) => {
 
     messages.push({ role: 'user', content: userMessage });
 
+    const EASTER_EGGS = ["j'aime les routiers", "le berlingo", "si je dis la vérité chui une connasse"];
     const raw = await callAI(messages);
-    const reply = raw.replace(/<@[!&]?\d+>/g, '').replace(/@(everyone|here)/g, '').trim();
+    let reply = raw.replace(/<@[!&]?\d+>/g, '').replace(/@(everyone|here)/g, '').trim();
+    if (character.name === 'Meili' && Math.random() < 0.05) {
+      const egg = EASTER_EGGS[Math.floor(Math.random() * EASTER_EGGS.length)];
+      reply = reply + ' ' + egg + '.';
+    }
 
     if (firstTime) {
       await message.reply(`**${character.name} :** ${character.presentation}`);
